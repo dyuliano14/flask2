@@ -14,3 +14,36 @@ deploymentTarget = "cloudrun"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[workflows]
+
+[[workflows.workflow]]
+name = "init"
+mode = "sequential"
+author = 23319309
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pip install -r public/requirements.txt"
+
+[[workflows.workflow]]
+name = "ambientelinux"
+mode = "sequential"
+author = 23319309
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m venv venv"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "source venv/bin/activate "
+
+[[workflows.workflow]]
+name = "run py"
+mode = "sequential"
+author = 23319309
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python public/src/main.py"

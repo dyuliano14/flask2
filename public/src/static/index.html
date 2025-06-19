@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudo Alego - Gerenciador de Estudos</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>Estudo Alego</h1>
+        </div>
+        <nav class="main-nav">
+            <ul>
+                <li><button class="nav-btn active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</button></li>
+                <li><button class="nav-btn" data-section="cursos"><i class="fas fa-book"></i> Meus Cursos</button></li>
+                <li><button class="nav-btn" data-section="flashcards"><i class="fas fa-copy"></i> Flashcards</button></li>
+                <li><button class="nav-btn" data-section="simulacoes"><i class="fas fa-pencil-alt"></i> Simulações</button></li>
+                <li><button class="nav-btn" data-section="feynman"><i class="fas fa-chalkboard-teacher"></i> Técnica Feynman</button></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn-primary" id="btn-novo-curso">
+                <i class="fas fa-plus"></i>
+                Novo Curso
+            </button>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <h2>Bem-vindo(a) ao seu gerenciador de estudos!</h2>
+        </header>
+
+        <section id="dashboard" class="section active">
+            <h3>Dashboard</h3>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4>Total de Cursos</h4>
+                    <p id="total-cursos">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Flashcards para Revisar</h4>
+                    <p id="total-flashcards">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Simulações Realizadas</h4>
+                    <p id="total-simulacoes">0</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Registros Feynman</h4>
+                    <p id="total-feynman">0</p>
+                </div>
+            </div>
+
+            <h4>Atividade Recente</h4>
+            <div class="activity-log" id="atividade-recente">
+                <!-- Atividade recente será carregada aqui -->
+            </div>
+        </section>
+
+        <section id="cursos" class="section">
+            <div class="cursos-layout">
+                <div class="cursos-sidebar">
+                    <h3>Meus Cursos</h3>
+                    <div id="lista-cursos">
+                        <!-- Lista de cursos será carregada aqui -->
+                    </div>
+                </div>
+                <div class="cursos-main-content">
+                    <div id="cursos-content">
+                        <!-- Conteúdo do curso selecionado será carregado aqui -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="flashcards" class="section">
+            <h3>Flashcards</h3>
+            <div id="flashcards-content">
+                <!-- Conteúdo dos flashcards será carregado aqui -->
+            </div>
+        </section>
+
+        <section id="simulacoes" class="section">
+            <h3>Simulações de Prova</h3>
+            <div id="simulacoes-content">
+                <!-- Conteúdo das simulações será carregado aqui -->
+            </div>
+        </section>
+
+        <section id="feynman" class="section">
+            <h3>Técnica Feynman</h3>
+            <div id="feynman-content">
+                <!-- Conteúdo da técnica Feynman será carregado aqui -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modais -->
+
+    <!-- Modal Novo Curso / Editar Curso -->
+    <div id="modal-novo-curso" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Novo Curso</h2>
+            <form id="form-novo-curso">
+                <div class="form-group">
+                    <label for="curso-nome">Nome do Curso</label>
+                    <input type="text" id="curso-nome" name="nome" placeholder="Ex: Direito Constitucional" required>
+                </div>
+                <div class="form-group">
+                    <label for="curso-descricao">Descrição (Opcional)</label>
+                    <textarea id="curso-descricao" name="descricao" rows="3" placeholder="Breve descrição do curso"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="num-materias">Quantas matérias?</label>
+                    <input type="number" id="num-materias" name="num-materias" value="1" min="1" onchange="Cursos.gerarInputsMaterias()">
+                </div>
+                <div id="materias-container">
+                    <!-- Inputs de matérias serão gerados aqui -->
+                </div>
+                <button type="submit" class="btn-primary">Salvar Curso</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar/Editar Conteúdo -->
+    <div id="modal-conteudo" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Adicionar/Editar Conteúdo</h2>
+            <form id="form-conteudo">
+                <div class="form-group">
+                    <label for="conteudo-titulo">Título do Conteúdo</label>
+                    <input type="text" id="conteudo-titulo" name="titulo" required>
+                </div>
+                <div class="form-group">
+                    <label for="conteudo-tipo">Tipo de Conteúdo</label>
+                    <select id="conteudo-tipo" name="tipo">
+                        <option value="markdown">Resumo (Markdown)</option>
+                        <option value="pdf">PDF</option>
+                        <option value="video">Vídeo</option>
+                    </select>
+                </div>
+                <div class="form-group" id="conteudo-texto-group">
+                    <label for="conteudo-texto">Conteúdo (Markdown)</label>
+                    <textarea id="conteudo-texto" name="conteudo_texto" rows="10"></textarea>
+                </div>
+                <div class="form-group" id="conteudo-arquivo-group" style="display: none;">
+                    <label for="conteudo-arquivo">Arquivo</label>
+                    <input type="file" id="conteudo-arquivo" name="arquivo">
+                </div>
+                <button type="submit" class="btn-primary">Salvar Conteúdo</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Conteúdo -->
+    <div id="modal-visualizar-conteudo" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="visualizar-titulo"></h2>
+            <div id="visualizar-conteudo-display" class="conteudo-display">
+                <!-- Conteúdo será renderizado aqui -->
+            </div>
+            <a id="visualizar-download-link" href="#" target="_blank" class="btn-secondary mt-3" style="display: none;">Baixar Arquivo</a>
+        </div>
+    </div>
+
+    <!-- Modal Editar Matéria -->
+    <div id="modal-materia" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Editar Matéria</h2>
+            <form id="form-materia">
+                <div class="form-group">
+                    <label for="materia-nome-edit">Nome da Matéria</label>
+                    <input type="text" id="materia-nome-edit" name="nome" required>
+                </div>
+                <div class="form-group">
+                    <label for="materia-descricao-edit">Descrição (Opcional)</label>
+                    <textarea id="materia-descricao-edit" name="descricao" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Matéria</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Simulação -->
+    <div id="modal-simulacao" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Nova Simulação</h2>
+            <form id="form-simulacao">
+                <div class="form-group">
+                    <label for="simulacao-titulo">Título da Simulação</label>
+                    <input type="text" id="simulacao-titulo" name="titulo" required>
+                </div>
+                <div class="form-group">
+                    <label for="simulacao-descricao">Descrição (Opcional)</label>
+                    <textarea id="simulacao-descricao" name="descricao" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Criar Simulação</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Feynman -->
+    <div id="modal-feynman" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Novo Registro Feynman</h2>
+            <form id="form-feynman">
+                <div class="form-group">
+                    <label for="feynman-topico">Tópico</label>
+                    <input type="text" id="feynman-topico" name="topico" required>
+                </div>
+                <div class="form-group">
+                    <label for="feynman-explicacao">Explicação</label>
+                    <textarea id="feynman-explicacao" name="explicacao" rows="10" required></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Salvar Registro</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>
+
+
